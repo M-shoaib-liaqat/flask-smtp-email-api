@@ -7,7 +7,11 @@ app = Flask(__name__)
 CORS(app)
 
 GMAIL_USER = "shoaibliaqat1010@gmail.com"
-GMAIL_APP_PASSWORD = "kmob nqkp rrcg qfyz"  # Replace with actual App Password
+GMAIL_APP_PASSWORD = "kmob nqkp rrcg qfyz"  # Use a Gmail App Password
+
+@app.route('/')
+def home():
+    return '✅ Flask SMTP API is live!'
 
 @app.route('/send-facility-email/', methods=['POST'])
 def send_facility_email():
@@ -15,7 +19,7 @@ def send_facility_email():
         data = request.get_json(force=True)
         print("📨 Received payload:", data)
 
-        recipients = data.get('recipients')  # List of strings
+        recipients = data.get('recipients')
         facility = data.get('facility')
         event = data.get('event')
 
@@ -46,4 +50,6 @@ def send_facility_email():
         print("🔥 Exception occurred:", str(e))
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
-application = app
+# Optional for local development
+if __name__ == '__main__':
+    app.run(debug=True)
