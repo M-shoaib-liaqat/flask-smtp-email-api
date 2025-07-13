@@ -20,14 +20,15 @@ def send_facility_email():
         print("📨 Received payload:", data)
 
         recipients = data.get('recipients')
-        facility = data.get('facility')
+        facilities = data.get('facilities')  # Now expecting a list of facilities
         event = data.get('event')
 
-        if not recipients or not isinstance(recipients, list) or not facility or not event:
+        if not recipients or not isinstance(recipients, list) or not facilities or not isinstance(facilities, list) or not event:
             return jsonify({'status': 'error', 'message': 'Missing or invalid fields'}), 400
 
-        subject = f"Facility Approved for {event}"
-        body = f'Your facility "{facility}" for event "{event}" has been approved. Please prepare accordingly.'
+        subject = f"Facilities Approved for {event}"
+        facilities_str = ', '.join(facilities)
+        body = f'The following facilities have been approved for event "{event}": {facilities_str}. Please prepare accordingly.'
 
         with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
             server.login(GMAIL_USER, GMAIL_APP_PASSWORD)
@@ -50,6 +51,5 @@ def send_facility_email():
         print("🔥 Exception occurred:", str(e))
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
-# Optional for local development
 if __name__ == '__main__':
     app.run(debug=True)
