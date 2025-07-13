@@ -6,9 +6,8 @@ from email.message import EmailMessage
 app = Flask(__name__)
 CORS(app)
 
-# Replace with your Gmail credentials (App Password recommended)
 GMAIL_USER = "shoaibliaqat1010@gmail.com"
-GMAIL_APP_PASSWORD = "kmob nqkp rrcg qfyz"  # Replace with your real app password
+GMAIL_APP_PASSWORD = "kmob nqkp rrcg qfyz"  # Replace with actual App Password
 
 @app.route('/send-facility-email/', methods=['POST'])
 def send_facility_email():
@@ -16,7 +15,7 @@ def send_facility_email():
         data = request.get_json(force=True)
         print("📨 Received payload:", data)
 
-        recipients = data.get('recipients')  # Expecting a list of emails
+        recipients = data.get('recipients')  # List of strings
         facility = data.get('facility')
         event = data.get('event')
 
@@ -26,22 +25,25 @@ def send_facility_email():
         subject = f"Facility Approved for {event}"
         body = f'Your facility "{facility}" for event "{event}" has been approved. Please prepare accordingly.'
 
-        msg = EmailMessage()
-        msg["Subject"] = subject
-        msg["From"] = GMAIL_USER
-        msg["To"] = ", ".join(recipients)
-        msg.set_content(body)
-
         with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
             server.login(GMAIL_USER, GMAIL_APP_PASSWORD)
-            server.send_message(msg)
 
-        print(f"✅ Email sent to {', '.join(recipients)}")
+            for to in recipients:
+                msg = EmailMessage()
+                msg["Subject"] = subject
+                msg["From"] = GMAIL_USER
+                msg["To"] = to
+                msg.set_content(body)
+                try:
+                    server.send_message(msg)
+                    print(f"✅ Email sent to {to}")
+                except Exception as e:
+                    print(f"❌ Failed to send to {to}: {e}")
+
         return jsonify({'status': 'success'}), 200
 
     except Exception as e:
         print("🔥 Exception occurred:", str(e))
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
-# For WSGI deployment (e.g., on Render)
 application = app
